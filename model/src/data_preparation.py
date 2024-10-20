@@ -177,50 +177,72 @@ def split_dataset(new_dataset_dir: str) -> None:
         for line in test_labels:
             test_file.write(f'{line}\n')
 
-def create_model_files(new_dataset_dir, model_data_dir: str) -> None:
-    # get current date in YYYYMMDD format
+def create_model_files(new_dataset_dir: str, templates_dir: str, model_data_dir: str) -> None:
     date = datetime.datetime.now().strftime("%Y%m%d")
-
     model_data_dir = os.path.join(model_data_dir, date)
     os.makedirs(model_data_dir, exist_ok=True)
 
-    # Create Hierarchical JSON file
-    hierarchical_data = {
-        "L0": [
-            {"name": "product"}
-        ],
-        "L1": [],
-        "L2": [],
-    }
+    # Create Hierarchical Representation file
+    try:
+        # Read hierachical representation file from templates directory
+        with open(os.path.join(templates_dir, "hierarchical_representation.json"), "r") as jsonFile:
+            hierarchical_data = json.load(jsonFile)
 
-    for index, category in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images'))):
-        l1Dict = {}
-        l1Dict["name"] = category
-        l1Dict["id"] = str(index)
-        l1Dict["parent"] = "product"
-        hierarchical_data["L1"].append(l1Dict)
+        # Iterate through the new dataset and create the L1 and L2 entries in the Hierarchical Representation
+        for index, category in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images'))):
+            l1Dict = {}
+            l1Dict["name"] = category
+            l1Dict["id"] = str(index)
+            l1Dict["parent"] = "product"
+            hierarchical_data["L1"].append(l1Dict)
 
-        for productId, product in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images', category))):
-            l2Dict = {}
-            l2Dict["name"] = product
-            l2Dict["id"] = str(productId)
-            l2Dict["parent"] = category
-            hierarchical_data["L2"].append(l2Dict)
+            for productId, product in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images', category))):
+                l2Dict = {}
+                l2Dict["name"] = product
+                l2Dict["id"] = str(productId)
+                l2Dict["parent"] = category
+                hierarchical_data["L2"].append(l2Dict)
+        
+        # Update Hierarchical Representation
+        with open(os.path.join(model_data_dir, "hierarchical_representation.json"),"w") as jsonFile:
+            json.dump(hierarchical_data, jsonFile, indent = 4)
+    except Exception as e:
+        print(f"Error creating hierarchical representation file: {e}")
+        print('Exitting')
+        exit(1)
+    
+    # Create Model Config file
+    try:
+        # Read Model Config yaml file in config variable
+        with open(os.path.join(templates_dir, "model_config.yaml"), "r") as yamlFile:
+            model_config = yaml.safe_load(yamlFile)
 
-    with open(os.path.join(model_data_dir, "hierarchical_representation.json"),"w") as jsonFile:
-        json.dump(hierarchical_data, jsonFile, indent = 4)
+        model_config['num_h0classes'] = len(class_count.keys())
+        model_config['num_h1classes'] = max([len(class_count[category].keys()) for category, _ in class_count.items()])
+
+        # Update Model Config 
+        with open(os.path.join(model_data_dir, "config.yaml"),"w") as yamlFile:
+            yaml.dump(model_config, yamlFile)
+
+    except Exception as e:
+        print(f"Error creating model config file: {e}")
+        print('Exitting')
+        exit(1)
 
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--original_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/original_dataset', required=False, help="Path to the configuration file")
-    parser.add_argument("--new_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/dataset', required=False, help="Path to the configuration file")
+    parser.add_argument("--original_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/original_dataset', required=False, help="Path to the original dataset directory")
+    parser.add_argument("--new_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/dataset', required=False, help="Path to the new dataset directory")
     parser.add_argument("--model_data_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/model_data', required=False, help="Path to the model directory")
+    parser.add_argument("--templates_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/templates', required=False, help="Path to the templates directory")
+    
     args = parser.parse_args()
 
     original_dataset_dir = args.original_dataset_dir
     new_dataset_dir = args.new_dataset_dir
     model_data_dir = args.model_data_dir
+    templates_dir = args.templates_dir
     
     # Check if the original dataset directory exists
     if not os.path.isdir(original_dataset_dir):
@@ -263,6 +285,6 @@ if __name__ == '__main__':
 
     split_dataset(new_dataset_dir)
 
-    create_model_files(new_dataset_dir, model_data_dir)
+    create_model_files(new_dataset_dir, templates_dir, model_data_dir)
 
     # TODO: Using matplotlib plot class count of each class in each category
