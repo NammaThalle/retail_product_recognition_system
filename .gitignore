@@ -156,6 +156,7 @@ cython_debug/
 
 dataset/
 original_dataset/
+model_data/
 *.zip
 
 # PyCharm

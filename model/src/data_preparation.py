@@ -177,6 +177,39 @@ def split_dataset(new_dataset_dir: str) -> None:
         for line in test_labels:
             test_file.write(f'{line}\n')
 
+def create_model_files(new_dataset_dir, model_data_dir: str) -> None:
+    # get current date in YYYYMMDD format
+    date = datetime.datetime.now().strftime("%Y%m%d")
+
+    model_data_dir = os.path.join(model_data_dir, date)
+    os.makedirs(model_data_dir, exist_ok=True)
+
+    # Create Hierarchical JSON file
+    hierarchical_data = {
+        "L0": [
+            {"name": "product"}
+        ],
+        "L1": [],
+        "L2": [],
+    }
+
+    for index, category in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images'))):
+        l1Dict = {}
+        l1Dict["name"] = category
+        l1Dict["id"] = str(index)
+        l1Dict["parent"] = "product"
+        hierarchical_data["L1"].append(l1Dict)
+
+        for productId, product in enumerate(os.listdir(os.path.join(new_dataset_dir, 'images', category))):
+            l2Dict = {}
+            l2Dict["name"] = product
+            l2Dict["id"] = str(productId)
+            l2Dict["parent"] = category
+            hierarchical_data["L2"].append(l2Dict)
+
+    with open(os.path.join(model_data_dir, "hierarchical_representation.json"),"w") as jsonFile:
+        json.dump(hierarchical_data, jsonFile, indent = 4)
+
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
@@ -230,6 +263,6 @@ if __name__ == '__main__':
 
     split_dataset(new_dataset_dir)
 
-    # create_model_files(new_dataset_dir, model_data_dir)
+    create_model_files(new_dataset_dir, model_data_dir)
 
     # TODO: Using matplotlib plot class count of each class in each category
