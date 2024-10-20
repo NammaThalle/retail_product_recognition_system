@@ -10,6 +10,7 @@ import datetime
 from tqdm import tqdm
 
 class_count = dict()
+ignore_classes = ['non_redbull']
 
 def xcycwhToxyxy(xcycwh, img_width: int, img_height: int) -> None:
     """
@@ -63,7 +64,7 @@ def process_dataset(class_names: str, dataset: str, new_dataset_dir: str) -> Non
         class_count[dataset_name] = dict()
 
     for class_name in class_names:
-        if not class_name in class_count[dataset_name]:
+        if not class_name in class_count[dataset_name] and not class_name in ignore_classes:
             class_count[dataset_name][class_name] = 0
         os.makedirs(os.path.join(new_dataset_dir, dataset_name, class_name), exist_ok=True)
 
@@ -85,6 +86,10 @@ def process_dataset(class_names: str, dataset: str, new_dataset_dir: str) -> Non
             try:
                 for label_yolo in labels_yolo:
                     label = label_yolo.strip().split()
+                    
+                    if class_names[int(label[0])] in ignore_classes:
+                        continue
+
                     x_center, y_center, width, height = map(float, label[1:])
 
                     # Convert YOLO coordinates to COCO format
@@ -99,15 +104,12 @@ def process_dataset(class_names: str, dataset: str, new_dataset_dir: str) -> Non
                     if cropped_image.shape[0] <= 25 or cropped_image.shape[1] <= 25:
                         continue
 
-                    if class_names[int(label[0])] == 'coca_cola_diet' and class_count[dataset_name][class_names[int(label[0])]] == 5:
-                        print(cropped_image.shape)
-
                     cv2.imwrite(cropped_image_path, cropped_image)
             except Exception as e:
                 print(f'Error processing image: {image_path}, error: {e}')
         else:
             print(f'Label file not found for: {label_path.split(dataset)[-1]}')
-
+    
 def create_labels(new_dataset_dir: str) -> None:
     """
     This function generates label files for each product image in the dataset.
