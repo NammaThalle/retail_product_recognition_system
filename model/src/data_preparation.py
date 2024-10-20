@@ -229,6 +229,10 @@ def create_model_files(new_dataset_dir: str, templates_dir: str, model_data_dir:
         print('Exitting')
         exit(1)
 
+    # Update the latest model id
+    with open(os.path.join(os.path.dirname(os.path.dirname(model_data_dir)), 'model.json'), 'w') as file:
+        json.dump({'latest': date}, file, indent=4)
+
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
