@@ -1,14 +1,16 @@
 import os
 import cv2
 import yaml
+import json
+import random
 import argparse
+import datetime
 
 from tqdm import tqdm
-from pprint import pprint
 
 class_count = dict()
 
-def xcycwhToxyxy(xcycwh, img_width, img_height):
+def xcycwhToxyxy(xcycwh, img_width: int, img_height: int) -> None:
     """
     Convert YOLO coordinates to COCO coordinates.
 
@@ -35,7 +37,7 @@ def xcycwhToxyxy(xcycwh, img_width, img_height):
     (x_min, y_min, width_abs, height_abs) = int(x_min), int(y_min), int(width_abs), int(height_abs)
     return (x_min, y_min, width_abs, height_abs)
 
-def process_dataset(class_names, dataset, new_dataset_dir):
+def process_dataset(class_names: str, dataset: str, new_dataset_dir: str) -> None:
     """
     This function processes a dataset of images and their corresponding labels,
     crops the images based on the provided labels, and saves the cropped images
@@ -52,6 +54,8 @@ def process_dataset(class_names, dataset, new_dataset_dir):
     dataset_types = ['train', 'valid', 'test']
     images = list()
 
+    new_dataset_dir = os.path.join(new_dataset_dir, 'images')
+
     dataset_name = os.path.basename(dataset_dir).split('_dataset')[0]
 
     if not dataset_name in class_count:
@@ -66,7 +70,7 @@ def process_dataset(class_names, dataset, new_dataset_dir):
         images_path = os.path.join(dataset, dataset_type, 'images')
         images.extend([os.path.join(images_path, image) for image in os.listdir(images_path)])
 
-    for image_path in tqdm(images, total=len(images), desc=f'Creating dataset: {os.path.basename(dataset)}'):
+    for image_path in tqdm(images, total=len(images), desc=f'Creating dataset: {os.path.basename(dataset)}', disable=True):
         label_path = os.path.join(image_path.split('images')[0], 'labels', f'{os.path.basename(image_path).split(".jpg")[0]}.txt')
 
         if os.path.exists(image_path) and os.path.exists(label_path):
@@ -103,24 +107,54 @@ def process_dataset(class_names, dataset, new_dataset_dir):
         else:
             print(f'Label file not found for: {label_path.split(dataset)[-1]}')
 
+def create_labels(new_dataset_dir: str) -> None:
+    """
+    This function generates label files for each product image in the dataset.
+    The label files contain the paths to the corresponding images.
+
+    Parameters:
+    - new_dataset_dir (str): The path to the new dataset directory where the images and labels will be saved.
+
+    Returns:
+    None
+    """
+    images_path = os.path.join(new_dataset_dir, 'images')
+    labels_path = os.path.join(new_dataset_dir, 'labels')
+
+    categories = os.listdir(images_path)
+    for category in tqdm(categories, desc='Generating labels'):
+        category_path = os.path.join(images_path, category)
+        for product in os.listdir(category_path):
+            labels = os.listdir(os.path.join(category_path, product))
+            os.makedirs(os.path.join(labels_path, category), exist_ok=True)
+            with open(os.path.join(labels_path, category, f'{product}.txt'), 'w') as file:
+                for label in labels:
+                    file.write(f"{os.path.join(images_path.split('dataset/')[-1], category, product, label)}\n")
+
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--original_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/original_dataset', required=False, help="Path to the configuration file")
     parser.add_argument("--new_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/dataset', required=False, help="Path to the configuration file")
+    parser.add_argument("--model_data_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/model_data', required=False, help="Path to the model directory")
     args = parser.parse_args()
 
     original_dataset_dir = args.original_dataset_dir
     new_dataset_dir = args.new_dataset_dir
+    model_data_dir = args.model_data_dir
     
     # Check if the original dataset directory exists
     if not os.path.isdir(original_dataset_dir):
         print(f"Error: {original_dataset_dir} is not a valid directory.")
         exit(1)
 
+    # Create images and labels directory 
+    os.makedirs(os.path.join(new_dataset_dir, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(new_dataset_dir, 'labels'), exist_ok=True)
+
     datasets = [folder for folder in os.listdir(original_dataset_dir) if os.path.isdir(os.path.join(original_dataset_dir, folder))]
     
-    for dataset in datasets:
+    for dataset in tqdm(datasets, desc='Generating dataset'):
         
         config_file = os.path.join(original_dataset_dir, dataset, 'data.yaml')
         # Check if the config file exists
@@ -128,7 +162,7 @@ if __name__ == '__main__':
             class_names = list()
             dataset_dir = list()
             try:
-                print(f'Found YoloV7 dataset in: {dataset}')
+                # print(f'Found YoloV7 dataset in: {dataset}')
                 # open config file
                 with open(config_file, "r") as file:
                     config = yaml.safe_load(file)
@@ -145,5 +179,11 @@ if __name__ == '__main__':
             
         else:
             print(f'No YoloV7 dataset found, skipping: {dataset}')
+    
+    create_labels(new_dataset_dir)
+
+    # split_dataset(new_dataset_dir)
+
+    # create_model_files(new_dataset_dir, model_data_dir)
 
     # TODO: Using matplotlib plot class count of each class in each category
