@@ -179,7 +179,7 @@ def split_dataset(new_dataset_dir: str) -> None:
 
 def create_model_files(new_dataset_dir: str, templates_dir: str, model_data_dir: str) -> None:
     date = datetime.datetime.now().strftime("%Y%m%d")
-    model_data_dir = os.path.join(model_data_dir, date)
+    model_data_dir = os.path.join(model_data_dir, date, 'model_inputs')
     os.makedirs(model_data_dir, exist_ok=True)
 
     # Create Hierarchical Representation file
