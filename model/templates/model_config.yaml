@@ -15,7 +15,7 @@ num_h0classes: <num_h0classes>
 num_h1classes: <num_h1classes>
 
 # Model normalization parameters
-epochs: 60
+epochs: 10
 image_size: 224
 batch_size: 128
 num_workers: 4
