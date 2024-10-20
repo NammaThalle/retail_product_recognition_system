@@ -131,6 +131,52 @@ def create_labels(new_dataset_dir: str) -> None:
                 for label in labels:
                     file.write(f"{os.path.join(images_path.split('dataset/')[-1], category, product, label)}\n")
 
+def split_dataset(new_dataset_dir: str) -> None:
+    """
+    This function splits the dataset into training, validation, and testing sets.
+    It reads the labels from the 'labels' directory, shuffles them, and then splits them into three separate lists.
+    The function then writes these lists to separate text files in the 'labels' directory.
+
+    Parameters:
+    - new_dataset_dir (str): The path to the new dataset directory where the images and labels are saved.
+
+    Returns:
+    - None
+    """
+    labels_path = os.path.join(new_dataset_dir, 'labels')
+
+    train_labels = list()
+    valid_labels = list()
+    test_labels = list()
+
+    categories = os.listdir(labels_path)
+    categories = [file for file in os.listdir(labels_path) if os.path.isdir(os.path.join(labels_path, file))]
+    for category in tqdm(categories, desc='Spliting dataset'):
+        label_files = os.listdir(os.path.join(labels_path, category))
+        for label_file in label_files:
+            with open(os.path.join(labels_path, category, label_file)) as file:
+                labels = file.readlines()
+                random.shuffle(labels)
+                train_count = int(len(labels) * 0.8)
+                valid_count = int(len(labels) * 0.1)
+
+                train_labels.extend([label.strip() for label in labels[:train_count]])
+                valid_labels.extend([label.strip() for label in labels[train_count:train_count + valid_count]])
+                test_labels.extend([label.strip() for label in labels[train_count + valid_count:]])
+
+    with open(os.path.join(labels_path, 'train.txt'), 'w') as train_file:
+        random.shuffle(train_labels)
+        for line in train_labels:
+            train_file.write(f'{line}\n')
+    with open(os.path.join(labels_path, 'valid.txt'), 'w') as valid_file:
+        random.shuffle(valid_labels)
+        for line in valid_labels:
+            valid_file.write(f'{line}\n')
+    with open(os.path.join(labels_path, 'test.txt'), 'w') as test_file:
+        random.shuffle(test_labels)
+        for line in test_labels:
+            test_file.write(f'{line}\n')
+
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
@@ -182,7 +228,7 @@ if __name__ == '__main__':
     
     create_labels(new_dataset_dir)
 
-    # split_dataset(new_dataset_dir)
+    split_dataset(new_dataset_dir)
 
     # create_model_files(new_dataset_dir, model_data_dir)
 
