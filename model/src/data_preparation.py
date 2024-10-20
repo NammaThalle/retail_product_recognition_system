@@ -2,6 +2,7 @@ import os
 import cv2
 import yaml
 import json
+import shutil
 import random
 import argparse
 import datetime
@@ -223,9 +224,18 @@ def create_model_files(new_dataset_dir: str, templates_dir: str, model_data_dir:
         # Update Model Config 
         with open(os.path.join(model_data_dir, "config.yaml"),"w") as yamlFile:
             yaml.dump(model_config, yamlFile)
-
     except Exception as e:
         print(f"Error creating model config file: {e}")
+        print('Exitting')
+        exit(1)
+
+    # Copy train-valid-test text files to current model path
+    try:
+        shutil.copy(os.path.join(new_dataset_dir, 'labels', "train.txt"), os.path.join(model_data_dir, "train.txt"))
+        shutil.copy(os.path.join(new_dataset_dir, 'labels', "valid.txt"), os.path.join(model_data_dir, "valid.txt"))
+        shutil.copy(os.path.join(new_dataset_dir, 'labels', "test.txt"), os.path.join(model_data_dir, "test.txt"))
+    except Exception as e:
+        print(f"Error copying train valid test text files: {e}")
         print('Exitting')
         exit(1)
 
@@ -236,10 +246,10 @@ def create_model_files(new_dataset_dir: str, templates_dir: str, model_data_dir:
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--original_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/original_dataset', required=False, help="Path to the original dataset directory")
-    parser.add_argument("--new_dataset_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/dataset', required=False, help="Path to the new dataset directory")
-    parser.add_argument("--model_data_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/model_data', required=False, help="Path to the model directory")
-    parser.add_argument("--templates_dir", default='/home/nammathalle/work/retail_product_recognition_system/model/templates', required=False, help="Path to the templates directory")
+    parser.add_argument("--original-dataset-dir", default='/home/nammathalle/work/retail_product_recognition_system/model/original_dataset', required=False, help="Path to the original dataset directory")
+    parser.add_argument("--new_dataset-dir", default='/home/nammathalle/work/retail_product_recognition_system/model/dataset', required=False, help="Path to the new dataset directory")
+    parser.add_argument("--model-data-dir", default='/home/nammathalle/work/retail_product_recognition_system/model/model_data', required=False, help="Path to the model directory")
+    parser.add_argument("--templates-dir", default='/home/nammathalle/work/retail_product_recognition_system/model/templates', required=False, help="Path to the templates directory")
     
     args = parser.parse_args()
 
