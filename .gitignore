@@ -158,6 +158,7 @@ dataset/
 original_dataset/
 model_data/
 *.zip
+.vscode
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
