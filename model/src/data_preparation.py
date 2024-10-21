@@ -64,9 +64,10 @@ def process_dataset(class_names: str, dataset: str, new_dataset_dir: str) -> Non
         class_count[dataset_name] = dict()
 
     for class_name in class_names:
-        if not class_name in class_count[dataset_name] and not class_name in ignore_classes:
-            class_count[dataset_name][class_name] = 0
-        os.makedirs(os.path.join(new_dataset_dir, dataset_name, class_name), exist_ok=True)
+        if not class_name in ignore_classes:
+            if not class_name in class_count[dataset_name] and not class_name in ignore_classes:
+                class_count[dataset_name][class_name] = 0
+            os.makedirs(os.path.join(new_dataset_dir, dataset_name, class_name), exist_ok=True)
 
     for dataset_type in dataset_types:
         images_path = os.path.join(dataset, dataset_type, 'images')
