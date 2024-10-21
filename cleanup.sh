@@ -1,0 +1,1 @@
+rm -rf /home/nammathalle/work/retail_product_recognition_system/model/dataset
