@@ -1,0 +1,43 @@
+# Model architecture name
+model_arch_name: resnet50
+
+# Model normalization parameters
+model_mean_parameters:
+  - 0.485
+  - 0.456
+  - 0.406
+model_std_parameters:
+  - 0.229
+  - 0.224
+  - 0.225
+
+num_h0classes: <num_h0classes>
+num_h1classes: <num_h1classes>
+
+# Model normalization parameters
+epochs: 10
+image_size: 224
+batch_size: 128
+num_workers: 4
+
+# Loss parameters
+loss_label_smoothing: 0
+loss_weights: 1.0
+
+# Optimizer parameter
+model_lr: 0.0001
+model_momentum: 0.9
+model_weight_decay: 0.0001
+model_ema_decay: 0.99998
+
+# Learning rate scheduler parameter
+lr_scheduler_T_0: 0 # Step size for LR
+lr_scheduler_T_mult: 2
+lr_scheduler_eta_min: 0.0000005
+
+# Print freuency of results
+print_frequency: 50
+
+# Misc parameters
+maintain_image_aspect_ratio: true
+use_albumentation: false
