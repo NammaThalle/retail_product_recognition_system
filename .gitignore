@@ -154,9 +154,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-dataset/
-original_dataset/
-model_data/
 *.zip
 .vscode
 mlruns/
