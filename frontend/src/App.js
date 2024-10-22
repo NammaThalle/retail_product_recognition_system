@@ -6,6 +6,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import axios from 'axios'; // Import axios to make API requests
 
 // Define light and dark themes with background color settings
 const lightTheme = createTheme({
@@ -45,18 +46,27 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [predictions, setPredictions] = useState([]);
 
-  const handleUpload = (event) => {
+  const handleUpload = async (event) => {
     setLoading(true);
     const file = event.target.files[0];
-    // Handle the file upload logic here
-    setTimeout(() => {
-      setPredictions([
-        { name: 'Product A', confidence: 95 },
-        { name: 'Product B', confidence: 85 },
-        { name: 'Product C', confidence: 75 },
-      ]);
+    const formData = new FormData();
+    formData.append('file', file); // Prepare the image file for the backend
+
+    try {
+      // Send image to backend
+      const response = await axios.post('http://localhost:8000/predict', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Update the predictions based on backend response
+      setPredictions(response.data.predictions); 
       setLoading(false);
-    }, 2000);
+    } catch (error) {
+      console.error("Error uploading file", error);
+      setLoading(false);
+    }
   };
 
   return (
