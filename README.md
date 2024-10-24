@@ -58,9 +58,9 @@ The frontend of the product is being developed using the ReactJS. With a functio
 The backend of the product is being developed using Python + FastAPI. The endpoint initializes the model and exposes the prediction API to the frontend. Once the user Uploads an image, the frontend relays the image to the backend through the FastAPI and then python handles the product classification. Finally, the backend forwards the predictions to the frontend.
 
 #### 5. API Reference
-1. Frontend exposed on - http://localhost:3000
-2. Backend exposed on - http://localhost:8000
-3. Prediction - http://localhost:3000/predict/ (POST) - to be used through frontend
+1. Frontend exposed on - http://<machine_ip>:3000
+2. Backend exposed on - http://<machine_ip>:8000
+3. Prediction - http://<machine_ip>:3000/predict/ (POST) - to be used through frontend
 
 ### 6. Instructions to run the Retail Product Recognition Application
 1. An x86_64 machine
@@ -75,8 +75,8 @@ cd <repository_name>
 docker-compose up --build
 ```
 5. Open your browser:
-    * Frontend (React): http://localhost:3000
-    * Backend (FastAPI): http://localhost:8000
+    * Frontend (React): http://<machine_ip>:3000 - **(IMPORTANT: Use CORS blocker extension for your browser)**
+    * Backend (FastAPI): http://<machine_ip>:8000
 6. Stopping the Project. To stop the project, run:
 ```
 docker-compose down
