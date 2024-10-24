@@ -1,0 +1,101 @@
+{
+    "L0": [
+        {
+            "name": "product"
+        }
+    ],
+    "L1": [
+        {
+            "name": "energy_drinks",
+            "id": "0",
+            "parent": "product"
+        },
+        {
+            "name": "juice",
+            "id": "1",
+            "parent": "product"
+        },
+        {
+            "name": "carbonated_beverages",
+            "id": "2",
+            "parent": "product"
+        }
+    ],
+    "L2": [
+        {
+            "name": "monster",
+            "id": "0",
+            "parent": "energy_drinks"
+        },
+        {
+            "name": "redbull",
+            "id": "1",
+            "parent": "energy_drinks"
+        },
+        {
+            "name": "real_fiber_multi_fruit",
+            "id": "0",
+            "parent": "juice"
+        },
+        {
+            "name": "tropicana_orange_fruit",
+            "id": "1",
+            "parent": "juice"
+        },
+        {
+            "name": "real_orange",
+            "id": "2",
+            "parent": "juice"
+        },
+        {
+            "name": "tropicana_mixed_fruit",
+            "id": "3",
+            "parent": "juice"
+        },
+        {
+            "name": "real_mixed_fruit",
+            "id": "4",
+            "parent": "juice"
+        },
+        {
+            "name": "tropicana_apple_fruit",
+            "id": "5",
+            "parent": "juice"
+        },
+        {
+            "name": "real_coconut_water",
+            "id": "6",
+            "parent": "juice"
+        },
+        {
+            "name": "real_apple",
+            "id": "7",
+            "parent": "juice"
+        },
+        {
+            "name": "pepsi",
+            "id": "0",
+            "parent": "carbonated_beverages"
+        },
+        {
+            "name": "coca_cola_original",
+            "id": "1",
+            "parent": "carbonated_beverages"
+        },
+        {
+            "name": "sprite",
+            "id": "2",
+            "parent": "carbonated_beverages"
+        },
+        {
+            "name": "coca_cola_diet",
+            "id": "3",
+            "parent": "carbonated_beverages"
+        },
+        {
+            "name": "fanta",
+            "id": "4",
+            "parent": "carbonated_beverages"
+        }
+    ]
+}

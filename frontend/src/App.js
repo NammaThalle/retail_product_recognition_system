@@ -42,6 +42,7 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const [imagePreview, setImagePreview] = useState(null);
   const [darkMode, setDarkMode] = useState(false);  // Night mode toggle state
   const [loading, setLoading] = useState(false);
   const [predictions, setPredictions] = useState([]);
@@ -49,19 +50,25 @@ function App() {
   const handleUpload = async (event) => {
     setLoading(true);
     const file = event.target.files[0];
+
+    // Preview the uploaded image
+    const imageUrl = URL.createObjectURL(file);
+    setImagePreview(imageUrl);
+
     const formData = new FormData();
     formData.append('file', file); // Prepare the image file for the backend
 
     try {
       // Send image to backend
-      const response = await axios.post('http://localhost:8000/predict', formData, {
+      const response = await axios.post('http://localhost:8000/predict/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
+      console.log(response)
       // Update the predictions based on backend response
-      setPredictions(response.data.predictions); 
+      setPredictions(response.data.result); 
       setLoading(false);
     } catch (error) {
       console.error("Error uploading file", error);
@@ -101,25 +108,31 @@ function App() {
             <Grid item xs={12} md={6}>
               {/* Image Upload Section */}
               <Card sx={{ textAlign: 'center', padding: 4 }}>
-                <Typography variant="h5" gutterBottom>
-                  Upload a Product Image
-                </Typography>
-                <Button
-                  variant="contained"
-                  component="label"
-                  startIcon={<PhotoCamera />}
-                  sx={{ marginTop: 2, marginBottom: 2 }}
-                >
-                  Upload Image
-                  <input hidden accept="image/*" type="file" onChange={handleUpload} />
-                </Button>
+                <div>
+                  <Typography variant="h5" gutterBottom>
+                    Upload a Product Image
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    startIcon={<PhotoCamera />}
+                    sx={{ marginTop: 2, marginBottom: 2 }}
+                  >
+                    Upload Image
+                    <input hidden accept="image/*" type="file" onChange={handleUpload} />
+                  </Button>
 
-                {/* Loading Indicator */}
-                {loading && <CircularProgress color="secondary" />}
+                  {/* Loading Indicator */}
+                  {loading && <CircularProgress color="secondary" />}
+                  <br/>
+                  {/* Display the uploaded image */}
+                  {imagePreview && <img src={imagePreview} alt="Uploaded preview" style={{ maxWidth: '100px', margin: '20px 0' }} />}
+                </div>
               </Card>
             </Grid>
           </Grid>
 
+          
           {/* Display Predictions */}
           <Box sx={{ mt: 6 }}>
             <Typography variant="h5" align="center" gutterBottom>
@@ -131,8 +144,9 @@ function App() {
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Card sx={{ textAlign: 'center', padding: 2 }}>
                     <CardContent>
-                      <Typography variant="h6">{prediction.name}</Typography>
-                      <Typography variant="body1" color="text.secondary">
+                      <Typography variant="h5">{prediction.name}</Typography>
+                      <Typography variant="body1">{prediction.category}</Typography>
+                      <Typography variant="body2" color="text.secondary">
                         Confidence: {prediction.confidence}%
                       </Typography>
                     </CardContent>
